@@ -75,8 +75,10 @@ def getEvents():
     start_date = request.args.get('start_date', default = default_date, type = str)
     end_date = request.args.get('end_date', default = default_date, type = str)
 
-    scoreboard_api_url = f'https://delivery.chalk247.com/scoreboard/NFL/{start_date}/{end_date}.json?api_key={API_KEY}'
-    team_rankings_api_url = f'https://delivery.chalk247.com/team_rankings/NFL.json?api_key={API_KEY}'    
+    base_url = 'https://delivery.chalk247.com'
+
+    scoreboard_api_url = f'{base_url}/scoreboard/NFL/{start_date}/{end_date}.json?api_key={API_KEY}'
+    team_rankings_api_url = f'{base_url}/team_rankings/NFL.json?api_key={API_KEY}'    
 
     # handle error from first external API call
     try:
