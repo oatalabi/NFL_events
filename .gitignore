@@ -1,0 +1,5 @@
+# Ignore Mac system files
+.DS_store
+
+# Ignore file related to API keys
+.env
