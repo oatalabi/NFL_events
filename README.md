@@ -18,6 +18,7 @@ python3 app.py
 The server launched will be available at `http://localhost:8000/`.
 URL format `http://localhost:8000/events?start_date=2020-01-12&end_date=2020-01-19` to get NFL events between 2020-01-12 and 2020-01-19
 if no dates are specified in the URL i.e `http://localhost:8000/events` NFL events for the current day will be used.
+Please enter dates within 1 week
 
 ### Run tests
 ```
