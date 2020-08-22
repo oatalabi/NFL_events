@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
-from flask_api import status
 from flask_cors import CORS, cross_origin
-import requests, re
+import requests
 import os
 from dotenv import load_dotenv
 import datetime
@@ -18,13 +17,19 @@ load_dotenv()
 API_KEY = os.getenv('API_KEY')
 
 @app.errorhandler(Exception) #handle any error exception in external API
-def handle_error(error):
+def handle_error(error_code):
+    error_code = int(str(error_code))
     response = {}
     response['message'] = 'An unexpected error has occurred.'
-    response['status'] = 500
-    return jsonify(response), 500
+    response['status'] = error_code
+    return jsonify(response), error_code
 
 def combine_data(scoreboard, rankings):
+    team_rankings = {}
+    # create team ranking dictionary setting team_id as key for each collection in rankings API result
+    for i in rankings:
+        team_rankings[i['team_id']] = i
+
     combined_results = []
     for day, day_obj in scoreboard.items():
         if day_obj:
@@ -33,8 +38,10 @@ def combine_data(scoreboard, rankings):
                 # get home and away team ids
                 away_team_id = day_obj['data'][id_]['away_team_id']
                 home_team_id = day_obj['data'][id_]['home_team_id']
-                away_ranking_data = next(filter(lambda rank: rank['team_id'] == away_team_id, rankings))
-                home_ranking_data = next(filter(lambda rank: rank['team_id'] == home_team_id, rankings))
+
+                # use team_ids to get team information from team_rankings
+                away_ranking_data = team_rankings[away_team_id]
+                home_ranking_data = team_rankings[home_team_id]
 
                 day_id_event = {}
 
@@ -69,16 +76,25 @@ def getEvents():
     end_date = request.args.get('end_date', default = default_date, type = str)
 
     scoreboard_api_url = f'https://delivery.chalk247.com/scoreboard/NFL/{start_date}/{end_date}.json?api_key={API_KEY}'
-    team_rankings_api_url = f'https://delivery.chalk247.com/team_rankings/NFL.json?api_key={API_KEY}'
+    team_rankings_api_url = f'https://delivery.chalk247.com/team_rankings/NFL.json?api_key={API_KEY}'    
 
-    scoreboard_data = requests.get(scoreboard_api_url, headers={"Accept": "application/json"})
+    # handle error from first external API call
+    try:
+        scoreboard_data = requests.get(scoreboard_api_url, headers={"Accept": "application/json"})
+        scoreboard_data.raise_for_status()
+    except requests.exceptions.RequestException as err:
+        raise Exception(scoreboard_data.status_code)
+
+    # handle error from second external API call
+    try:
+        team_rankings_data = requests.get(team_rankings_api_url, headers={"Accept": "application/json"})
+        team_rankings_data.raise_for_status()
+    except requests.exceptions.RequestException as err:
+        raise Exception(team_rankings_data.status_code)
+
     scoreboard_results = scoreboard_data.json()['results']
-    
-    team_rankings_data = requests.get(team_rankings_api_url, headers={"Accept": "application/json"})
     rankings_results = team_rankings_data.json()['results']['data']
-
     response_data = combine_data(scoreboard_results, rankings_results)
-    
     return jsonify(response_data), 200
 
 # start the server
