@@ -3,3 +3,6 @@
 
 # Ignore file related to API keys
 .env
+
+# Ignore virtual environment venv
+.venv

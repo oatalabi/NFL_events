@@ -8,8 +8,15 @@ Download or `git clone` this repository to run locally.
 The code for the backend server is in the `app.py` file.
 
 ### Installation
-First, ensure Python 3.7+ is installed. Next, install the required dependencies:
+First, ensure Python 3.7+ is installed. Next, install the required dependencies using a virtual environment to avoid installing Python packages globally which could break other projects:
+```
+    python3 -m venv .venv
+    source .venv/bin/activate
     pip3 install -r requirements.txt
+```
+
+### Environment Variable
+Create a `.env` file and keep your API KEY for `https://delivery.chalk247.com` using `.env.sample` as a guide.
 
 ### Run the server:
 ```
@@ -24,7 +31,6 @@ Please enter dates within 1 week
 ```
 python3 test_app.py
 ```
-
 
 # Assumptions and Explanations
 
